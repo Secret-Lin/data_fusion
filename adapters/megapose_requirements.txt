@@ -1,0 +1,13 @@
+# Additional inference dependencies in conda mr_nav. Core torch/numpy/etc. are
+# already provided by this project. Install with --no-deps to avoid replacements.
+panda3d==1.10.16
+transforms3d==0.4.2
+roma==1.6.1
+xarray==2025.6.1
+structlog==26.1.0
+webdataset==1.0.2
+bokeh==3.9.2
+torchgeometry==0.1.2
+braceexpand==0.1.7
+xyzservices==2026.9.1
+pypng==0.20220715.0

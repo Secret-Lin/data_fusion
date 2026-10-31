@@ -1,0 +1,21 @@
+source: replay
+session: data/laboratory/session
+loop: false
+fps: null
+prompt: false
+
+frontend: true
+frontend_detector: yolo_seg
+frontend_model: thirdparty/Ultralytics/models/yolov8n-seg.pt
+frontend_device: cuda
+
+tracking: false
+fusion: false
+baseline: true
+navigation: false
+unity_bridge: false
+calibration: false
+hl2: false
+
+record: false
+record_out_dir: results/replay_baseline

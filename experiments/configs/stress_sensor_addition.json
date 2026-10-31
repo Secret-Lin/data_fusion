@@ -1,0 +1,32 @@
+{
+  "experiment_name": "stress_sensor_addition",
+  "duration_s": 120,
+  "gt_path": "records/ground_truth_robot.jsonl",
+  "common_args": [
+    "--no-prompt",
+    "--sensor",
+    "--tracking",
+    "--fusion",
+    "--baseline",
+    "--no-navigation",
+    "--no-unity-bridge",
+    "--no-calibration",
+    "--no-hl2",
+    "--dope-weights",
+    "REPLACE_WITH_DOPE_WEIGHTS",
+    "--dope-object",
+    "REPLACE_WITH_DOPE_OBJECT"
+  ],
+  "methods": {
+    "fusion_sensor_addition": {
+      "backend_args": [
+        "--exp-mode",
+        "sensor_addition",
+        "--frontend",
+        "--exp-camera-start",
+        "CAMERA_C:30.0"
+      ],
+      "est_file": "pose_fused.jsonl"
+    }
+  }
+}

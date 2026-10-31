@@ -1,0 +1,32 @@
+{
+  "experiment_name": "stress_occlusion",
+  "duration_s": 120,
+  "gt_path": "records/ground_truth_robot.jsonl",
+  "common_args": [
+    "--no-prompt",
+    "--sensor",
+    "--tracking",
+    "--fusion",
+    "--baseline",
+    "--no-navigation",
+    "--no-unity-bridge",
+    "--no-calibration",
+    "--no-hl2",
+    "--dope-weights",
+    "REPLACE_WITH_DOPE_WEIGHTS",
+    "--dope-object",
+    "REPLACE_WITH_DOPE_OBJECT"
+  ],
+  "methods": {
+    "fusion_occlusion": {
+      "backend_args": [
+        "--exp-mode",
+        "occlusion",
+        "--frontend",
+        "--exp-drop",
+        "CAMERA_A:0.20,CAMERA_B:0.35,CAMERA_C:0.35"
+      ],
+      "est_file": "pose_fused.jsonl"
+    }
+  }
+}

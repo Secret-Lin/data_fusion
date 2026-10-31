@@ -1,0 +1,144 @@
+format_version: 1
+coordinate_system: y_up
+dictionary: DICT_4X4_50
+units: metres
+coordinate_convention:
+  transform: T_A_B maps points from frame B to frame A
+  origin: cube centre
+  world_axes: +Z outward through Tag 0; +X Tag 0 right; +Y Tag 0 top
+  tag_axes: +X right; +Y top; +Z outward from printed face
+cube_size_m: 0.05
+tag_size_m: 0.04
+reference_tag_id: 0
+created_unix_time: 1788331572.4433358
+pair_sample_counts:
+  0-3: 62
+  0-4: 48
+  1-4: 108
+  1-5: 109
+  2-3: 151
+  2-5: 160
+  3-4: 160
+  3-5: 160
+  4-5: 160
+tags:
+  0:
+    face: +Z
+    snap_angular_residual_deg: 0.0
+    T_world_tag:
+    - - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 1.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 1.0
+      - 0.025
+    - - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+  1:
+    face: +X
+    snap_angular_residual_deg: 1.227789899796198
+    T_world_tag:
+    - - -0.0
+      - 0.0
+      - 1.0
+      - 0.025
+    - - -0.0
+      - 1.0
+      - 0.0
+      - 0.0
+    - - -1.0
+      - 0.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+  2:
+    face: +Y
+    snap_angular_residual_deg: 1.1993487439803558
+    T_world_tag:
+    - - -0.0
+      - -1.0
+      - 0.0
+      - 0.0
+    - - -0.0
+      - 0.0
+      - 1.0
+      - 0.025
+    - - -1.0
+      - 0.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+  3:
+    face: -X
+    snap_angular_residual_deg: 0.9253707113418091
+    T_world_tag:
+    - - 0.0
+      - 0.0
+      - -1.0
+      - -0.025
+    - - 0.0
+      - 1.0
+      - 0.0
+      - 0.0
+    - - 1.0
+      - -0.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+  4:
+    face: -Y
+    snap_angular_residual_deg: 0.9317114041900951
+    T_world_tag:
+    - - -0.0
+      - 1.0
+      - 0.0
+      - 0.0
+    - - -0.0
+      - 0.0
+      - -1.0
+      - -0.025
+    - - -1.0
+      - -0.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+  5:
+    face: -Z
+    snap_angular_residual_deg: 1.2150725696104232
+    T_world_tag:
+    - - -1.0
+      - -0.0
+      - 0.0
+      - 0.0
+    - - -0.0
+      - 1.0
+      - 0.0
+      - 0.0
+    - - -0.0
+      - 0.0
+      - -1.0
+      - -0.025
+    - - 0.0
+      - 0.0
+      - 0.0
+      - 1.0

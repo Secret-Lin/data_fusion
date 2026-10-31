@@ -1,0 +1,34 @@
+{
+  "experiment_name": "stress_degraded",
+  "duration_s": 120,
+  "gt_path": "records/ground_truth_robot.jsonl",
+  "common_args": [
+    "--no-prompt",
+    "--sensor",
+    "--tracking",
+    "--fusion",
+    "--baseline",
+    "--no-navigation",
+    "--no-unity-bridge",
+    "--no-calibration",
+    "--no-hl2",
+    "--dope-weights",
+    "REPLACE_WITH_DOPE_WEIGHTS",
+    "--dope-object",
+    "REPLACE_WITH_DOPE_OBJECT"
+  ],
+  "methods": {
+    "fusion_degraded": {
+      "backend_args": [
+        "--exp-mode",
+        "degraded",
+        "--frontend",
+        "--exp-noise-trans",
+        "0.01",
+        "--exp-noise-rot",
+        "2.0"
+      ],
+      "est_file": "pose_fused.jsonl"
+    }
+  }
+}

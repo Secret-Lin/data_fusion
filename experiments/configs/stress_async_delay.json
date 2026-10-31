@@ -1,0 +1,32 @@
+{
+  "experiment_name": "stress_async_delay",
+  "duration_s": 120,
+  "gt_path": "records/ground_truth_robot.jsonl",
+  "common_args": [
+    "--no-prompt",
+    "--sensor",
+    "--tracking",
+    "--fusion",
+    "--baseline",
+    "--no-navigation",
+    "--no-unity-bridge",
+    "--no-calibration",
+    "--no-hl2",
+    "--dope-weights",
+    "REPLACE_WITH_DOPE_WEIGHTS",
+    "--dope-object",
+    "REPLACE_WITH_DOPE_OBJECT"
+  ],
+  "methods": {
+    "fusion_delay": {
+      "backend_args": [
+        "--exp-mode",
+        "async_delay",
+        "--frontend",
+        "--exp-delay",
+        "CAMERA_A:0.00,CAMERA_B:0.06,CAMERA_C:0.10"
+      ],
+      "est_file": "pose_fused.jsonl"
+    }
+  }
+}

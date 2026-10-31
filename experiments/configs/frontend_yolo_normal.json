@@ -1,0 +1,47 @@
+{
+  "experiment_name": "frontend_yolo_normal",
+  "duration_s": 120,
+  "gt_path": "records/ground_truth_robot.jsonl",
+  "common_args": [
+    "--no-prompt",
+    "--sensor",
+    "--frontend",
+    "--fusion",
+    "--baseline",
+    "--no-tracking",
+    "--no-navigation",
+    "--no-unity-bridge",
+    "--no-calibration",
+    "--no-hl2",
+    "--frontend-detector",
+    "yolo_seg",
+    "--frontend-model",
+    "thirdparty/Ultralytics/models/yolov8n-seg.pt",
+    "--frontend-device",
+    "cpu",
+    "--frontend-target-classes",
+    "bottle"
+  ],
+  "methods": {
+    "fusion_full_seg3d": {
+      "backend_args": [],
+      "est_file": "pose_fused.jsonl"
+    },
+    "baseline_best_seg3d": {
+      "backend_args": ["--no-fusion"],
+      "est_file": "pose_baseline_best.jsonl"
+    },
+    "baseline_avg_seg3d": {
+      "backend_args": ["--no-fusion"],
+      "est_file": "pose_baseline_avg.jsonl"
+    },
+    "baseline_single_seg3d": {
+      "backend_args": [
+        "--no-fusion",
+        "--baseline-single-camera",
+        "realsense/CAMERA_SERIAL"
+      ],
+      "est_file": "pose_baseline_single.jsonl"
+    }
+  }
+}

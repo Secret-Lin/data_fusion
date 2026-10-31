@@ -1,0 +1,59 @@
+{
+  "experiment_name": "main_real_tracking",
+  "duration_s": 120,
+  "gt_path": "records/ground_truth_robot.jsonl",
+  "fail_trans_m": 0.05,
+  "fail_rot_deg": 10.0,
+  "degrade_trans_m": 0.03,
+  "degrade_rot_deg": 5.0,
+  "max_match_dt_s": 0.05,
+  "common_args": [
+    "--no-prompt",
+    "--sensor",
+    "--tracking",
+    "--baseline",
+    "--fusion",
+    "--no-navigation",
+    "--no-unity-bridge",
+    "--no-calibration",
+    "--no-hl2",
+    "--dope-weights",
+    "REPLACE_WITH_DOPE_WEIGHTS",
+    "--dope-object",
+    "REPLACE_WITH_DOPE_OBJECT"
+  ],
+  "methods": {
+    "fusion_full": {
+      "backend_args": [],
+      "est_file": "pose_fused.jsonl"
+    },
+    "baseline_best": {
+      "backend_args": ["--no-fusion"],
+      "est_file": "pose_baseline_best.jsonl"
+    },
+    "baseline_avg": {
+      "backend_args": ["--no-fusion"],
+      "est_file": "pose_baseline_avg.jsonl"
+    },
+    "baseline_single": {
+      "backend_args": [
+        "--no-fusion",
+        "--baseline-single-camera",
+        "realsense/CAMERA_SERIAL"
+      ],
+      "est_file": "pose_baseline_single.jsonl"
+    },
+    "fg_fixed_cov": {
+      "backend_args": ["--no-fusion-adaptive-cov"],
+      "est_file": "pose_fused.jsonl"
+    },
+    "fg_no_online_calibration": {
+      "backend_args": ["--no-fusion-online-calibration"],
+      "est_file": "pose_fused.jsonl"
+    },
+    "fg_no_integrity": {
+      "backend_args": ["--no-fusion-integrity-monitoring"],
+      "est_file": "pose_fused.jsonl"
+    }
+  }
+}

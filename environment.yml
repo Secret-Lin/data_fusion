@@ -1,0 +1,17 @@
+name: mr_nav
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - numpy=2.2
+  - scipy=1.15
+  - gtsam=4.2
+  - opencv>=4.10
+  - h5py
+  - pandas
+  - pillow
+  - pyyaml
+  - trimesh
+  - matplotlib
+  - pytest
+  - pip

@@ -1,0 +1,13 @@
+{
+  "huber_k": 1.345,
+  "max_iterations": 60,
+  "relative_error_tol": 1e-7,
+  "absolute_error_tol": 1e-9,
+  "angular_accel_density": 1.0,
+  "linear_accel_density": 0.5,
+  "initial_angular_velocity_sigma": 1.0,
+  "initial_linear_velocity_sigma": 0.5,
+  "nis_threshold": 16.8119,
+  "max_prediction_gap_s": 0.5,
+  "max_group_span_s": 0.04
+}

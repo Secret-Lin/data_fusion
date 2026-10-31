@@ -1,0 +1,197 @@
+diff --git a/src/megapose/config.py b/src/megapose/config.py
+index d1cdecb..7bf6cc7 100644
+--- a/src/megapose/config.py
++++ b/src/megapose/config.py
+@@ -41,7 +41,7 @@ BLENDER_PROC_DIR = PROJECT_DIR.parent / "blenderproc"
+ BLENDER_VERSION = "blender-2.93.8-linux-x64"
+ BLENDER_INSTALL_DIR = LOCAL_DATA_DIR / BLENDER_VERSION
+ if not BLENDER_INSTALL_DIR.exists():
+-    BLENDER_INSTALL_DIR = Path(os.environ["HOME"]) / BLENDER_VERSION
++    BLENDER_INSTALL_DIR = Path.home() / BLENDER_VERSION
+ PYTHON_BIN_PATH = Path(os.environ["CONDA_PREFIX"]) / "bin/python"
+ 
+ BOP_PANDA3D_DS_DIR = LOCAL_DATA_DIR / "bop_models_panda3d"
+diff --git a/src/megapose/lib3d/symmetries.py b/src/megapose/lib3d/symmetries.py
+index 79e3d9d..580c8dd 100644
+--- a/src/megapose/lib3d/symmetries.py
++++ b/src/megapose/lib3d/symmetries.py
+@@ -36,8 +36,8 @@ class ContinuousSymmetry:
+     See https://github.com/thodan/bop_toolkit/blob/master/bop_toolkit_lib/misc.py
+     """
+ 
+-    offset: npt.NDArray[np.float_]
+-    axis: npt.NDArray[np.float_]
++    offset: npt.NDArray[np.float64]
++    axis: npt.NDArray[np.float64]
+ 
+ 
+ @dataclass
+@@ -46,7 +46,7 @@ class DiscreteSymmetry:
+     pose: (4, 4) homogeneous matrix
+     """
+ 
+-    pose: npt.NDArray[np.float_]
++    pose: npt.NDArray[np.float64]
+ 
+ 
+ def make_symmetries_poses(
+diff --git a/src/megapose/lib3d/transform.py b/src/megapose/lib3d/transform.py
+index fbbdfb2..0674546 100644
+--- a/src/megapose/lib3d/transform.py
++++ b/src/megapose/lib3d/transform.py
+@@ -20,19 +20,22 @@ from typing import Tuple, Union
+ 
+ # Third Party
+ import numpy as np
+-import pinocchio as pin
++try:
++    import pinocchio as pin
++except ImportError:
++    pin = None
+ import torch
+ 
+ 
+-class Transform:
++class PinocchioTransform:
+     """A representation of a SE(3) object based on pinocchio's pin.SE3."""
+ 
+     def __init__(
+         self,
+         *args: Union[
+-            Union[pin.SE3, np.ndarray, torch.Tensor],  # T
++            Union[np.ndarray, torch.Tensor],  # T
+             Union[
+-                pin.Quaternion, np.ndarray, torch.Tensor, Tuple[float, float, float, float]
++                np.ndarray, torch.Tensor, Tuple[float, float, float, float]
+             ],  # rotation
+             Union[np.ndarray, torch.Tensor, Tuple[float, float, float]],  # translation
+         ]
+@@ -110,10 +113,17 @@ class Transform:
+         return self._T.translation.reshape(3)
+ 
+     @property
+-    def quaternion(self) -> pin.Quaternion:
++    def quaternion(self):
+         return pin.Quaternion(self._T.rotation)
+ 
+     @property
+     def matrix(self) -> np.ndarray:
+         """Returns 4x4 homogeneous matrix representations"""
+         return self._T.homogeneous
++
++
++if pin is None:
++    # Project portability shim; matrix/quaternion inference operations only.
++    from adapters.megapose_transform import Transform
++else:
++    Transform = PinocchioTransform
+diff --git a/src/megapose/panda3d_renderer/panda3d_batch_renderer.py b/src/megapose/panda3d_renderer/panda3d_batch_renderer.py
+index 9e5bded..8d11dd0 100644
+--- a/src/megapose/panda3d_renderer/panda3d_batch_renderer.py
++++ b/src/megapose/panda3d_renderer/panda3d_batch_renderer.py
+@@ -18,6 +18,8 @@ limitations under the License.
+ 
+ # Standard Library
+ from dataclasses import dataclass
++import queue
++import time
+ from typing import List, Optional, Set, Union
+ 
+ # Third Party
+@@ -248,7 +250,16 @@ class Panda3dBatchRenderer:
+         list_normals = [None for _ in np.arange(bsz)]
+ 
+         for n in np.arange(bsz):
+-            renders = self._out_queue.get()
++            started_wait = time.monotonic()
++            while True:
++                try:
++                    renders = self._out_queue.get(timeout=1)
++                    break
++                except queue.Empty:
++                    if any(not worker.is_alive() for worker in self._renderers):
++                        raise RuntimeError("MegaPose renderer worker exited; inspect worker traceback")
++                    if time.monotonic() - started_wait > 120:
++                        raise TimeoutError("MegaPose renderer returned no image for 120 seconds")
+             data_id = renders.data_id
+             list_rgbs[data_id] = renders.rgb
+             if render_depth:
+@@ -328,8 +339,10 @@ class Panda3dBatchRenderer:
+         for n in range(self._n_workers):
+             self._worker_id_to_queue[n].put(None)
+         for renderer_process in self._renderers:
+-            renderer_process.join()
+-            renderer_process.terminate()
++            renderer_process.join(timeout=5)
++            if renderer_process.is_alive():
++                renderer_process.terminate()
++                renderer_process.join(timeout=5)
+         for queue in self._in_queues:
+             queue.close()
+         self._out_queue.close()
+diff --git a/src/megapose/panda3d_renderer/panda3d_scene_renderer.py b/src/megapose/panda3d_renderer/panda3d_scene_renderer.py
+index e3606d5..df241f5 100644
+--- a/src/megapose/panda3d_renderer/panda3d_scene_renderer.py
++++ b/src/megapose/panda3d_renderer/panda3d_scene_renderer.py
+@@ -200,7 +200,7 @@ class Panda3dSceneRenderer:
+         scale = asset.scaling_factor_mesh_units_to_meters * asset.scaling_factor
+         y, p, r = asset.ypr_offset_deg
+ 
+-        node = self._app.loader.load_model(str(asset.mesh_path), noCache=True)
++        node = self._app.loader.load_model(p3d.core.Filename.from_os_specific(str(asset.mesh_path)), noCache=True)
+         node.setScale(scale)
+         node.setPos(0, 0, 0)
+         node.setHpr(y, p, r)
+diff --git a/src/megapose/panda3d_renderer/types.py b/src/megapose/panda3d_renderer/types.py
+index 63be5a6..53a225e 100644
+--- a/src/megapose/panda3d_renderer/types.py
++++ b/src/megapose/panda3d_renderer/types.py
+@@ -164,7 +164,12 @@ class Panda3dCamera:
+         resolution_ = (resolution[1], resolution[0])
+         window_props.setSize(*resolution_)
+ 
+-        frame_buffer_props = p3d.core.FrameBufferProperties.getDefault()
++        frame_buffer_props = p3d.core.FrameBufferProperties(p3d.core.FrameBufferProperties.getDefault())
++        # WGL offscreen buffers on Windows do not provide the requested MSAA.
++        import os
++        if os.name == "nt":
++            frame_buffer_props.setMultisamples(0)
++            frame_buffer_props.setBackBuffers(0)
+         graphics_buffer = app.graphicsEngine.make_output(
+             app.pipe,
+             f"Graphics Buffer [{name}]",
+@@ -176,6 +181,8 @@ class Panda3dCamera:
+             app.win,
+         )
+ 
++        if graphics_buffer is None:
++            raise RuntimeError("Could not create MegaPose offscreen graphics buffer")
+         texture = p3d.core.Texture()
+         graphics_buffer.addRenderTexture(
+             texture,
+diff --git a/src/megapose/utils/random.py b/src/megapose/utils/random.py
+index 831ddab..54f600e 100644
+--- a/src/megapose/utils/random.py
++++ b/src/megapose/utils/random.py
+@@ -26,7 +26,10 @@ import webdataset as wds
+ # Third Party
+ import torch
+ import numpy as np
+-import pinocchio as pin
++try:
++    import pinocchio as pin
++except ImportError:
++    pin = None
+ 
+ 
+ def make_seed(*args):
+@@ -59,7 +62,8 @@ def get_unique_seed() -> int:
+ 
+ 
+ def set_seed(seed: int) -> None:
+-    pin.seed(seed)
++    if pin is not None:
++        pin.seed(seed)
+     np.random.seed(seed)
+     torch.manual_seed(seed)
+     random.seed(seed)

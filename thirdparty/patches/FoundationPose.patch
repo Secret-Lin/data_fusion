@@ -1,0 +1,99 @@
+diff --git a/Utils.py b/Utils.py
+index 283028f..af10a15 100644
+--- a/Utils.py
++++ b/Utils.py
+@@ -17,13 +17,13 @@ from pytorch3d.structures import Meshes
+ from scipy.interpolate import griddata
+ import nvdiffrast.torch as dr
+ import torch.nn.functional as F
++import cv2
+ import torchvision
+ import torch.nn as nn
+ from functools import partial
+ import pandas as pd
+ import open3d as o3d
+ from uuid import uuid4
+-import cv2
+ from PIL import Image
+ import numpy as np
+ from collections import defaultdict
+@@ -571,8 +571,15 @@ def compute_mesh_diameter(model_pts=None, mesh=None, n_sample=1000):
+   else:
+     ids = np.random.choice(len(model_pts), size=min(n_sample, len(model_pts)), replace=False)
+     pts = model_pts[ids]
+-  dists = np.linalg.norm(pts[None]-pts[:,None], axis=-1)
+-  diameter = dists.max()
++  # Exact same sampled points and Euclidean distances, with bounded temporary
++  # memory. The former 10000 x 10000 x 3 array needs several GiB per camera.
++  # Visit the upper block triangle; distance symmetry preserves the maximum.
++  if len(pts) == 0:
++    raise ValueError('Cannot compute the diameter of an empty point set')
++  diameter = 0.0
++  for start in range(0, len(pts), 256):
++    dists = np.linalg.norm(pts[None, start:] - pts[start:start+256, None], axis=-1)
++    diameter = np.maximum(diameter, dists.max())
+   return diameter
+ 
+ 
+diff --git a/estimater.py b/estimater.py
+index e147d56..a0d6d0e 100644
+--- a/estimater.py
++++ b/estimater.py
+@@ -10,6 +10,7 @@
+ from Utils import *
+ from datareader import *
+ import itertools
++import tempfile
+ from learning.training.predict_score import *
+ from learning.training.predict_pose_refine import *
+ import yaml
+@@ -66,7 +67,7 @@ class FoundationPose:
+     self.mesh_path = None
+     self.mesh = mesh
+     if self.mesh is not None:
+-      self.mesh_path = f'/tmp/{uuid.uuid4()}.obj'
++      self.mesh_path = os.path.join(tempfile.gettempdir(), f'{uuid.uuid4()}.obj')
+       self.mesh.export(self.mesh_path)
+     self.mesh_tensors = make_mesh_tensors(self.mesh)
+ 
+diff --git a/mycpp/CMakeLists.txt b/mycpp/CMakeLists.txt
+index 7c8a9a5..25dfba2 100644
+--- a/mycpp/CMakeLists.txt
++++ b/mycpp/CMakeLists.txt
+@@ -4,7 +4,11 @@ project(mycpp)
+ 
+ set(CMAKE_BUILD_TYPE Release)
+ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fopenmp -g3 -O3")
++if(MSVC)
++  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /openmp /O2")
++else()
++  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fopenmp -g3 -O3")
++endif()
+ 
+ 
+ find_package(Boost REQUIRED COMPONENTS system program_options)
+@@ -22,4 +26,7 @@ file(GLOB MY_SRC ${PROJECT_SOURCE_DIR}/src/*.cpp)
+ set(PYBIND11_CPP_STANDARD -std=c++14)
+ 
+ pybind11_add_module(mycpp src/app/pybind_api.cpp ${MY_SRC})
+-target_link_libraries(mycpp PRIVATE ${Boost_LIBRARIES} ${OpenMP_CXX_FLAGS} Eigen3::Eigen)
+\ No newline at end of file
++if(MSVC)
++  target_compile_definitions(mycpp PRIVATE _USE_MATH_DEFINES)
++endif()
++target_link_libraries(mycpp PRIVATE ${Boost_LIBRARIES} ${OpenMP_CXX_FLAGS} Eigen3::Eigen)
+diff --git a/mycpp/include/Utils.h b/mycpp/include/Utils.h
+index 41703f5..bcaf8ef 100644
+--- a/mycpp/include/Utils.h
++++ b/mycpp/include/Utils.h
+@@ -27,7 +27,9 @@
+ #include <Eigen/Geometry>
+ #include <string>
+ #include <limits.h>
++#ifndef _WIN32
+ #include <unistd.h>
++#endif
+ #include <memory>
+ #include <math.h>
+ #include <boost/format.hpp>

@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-31",
+  "environment": "mr_nav",
+  "python": "3.10.19 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 16:41:31) [MSC v.1929 64 bit (AMD64)]",
+  "pytest": {
+    "passed": 211,
+    "skipped": 10,
+    "skip_reasons": {
+      "optional_FoundationPose_source": 8,
+      "optional_HOPE_mesh": 1,
+      "optional_laboratory_report_artifacts": 1
+    }
+  },
+  "python_syntax": "passed",
+  "powershell_syntax": {
+    "files": 20,
+    "errors": 0
+  },
+  "cli_help_and_source_list_checks": 8,
+  "bounded_format_check": {
+    "cameras": 5,
+    "frames": 12,
+    "fixture": "deterministic annotation-format plumbing"
+  },
+  "core_sources_matching_working_tree": 45,
+  "thirdparty_patch_checks": {
+    "FoundationPose": {
+      "revision": "a1b694b83e633c2cb6115b9063d940a687759392",
+      "patch_sha256": "60ec0c495bac4f697fdf27c1ed925291685faa1bb80f681d77890255cccdecee"
+    },
+    "megapose6d": {
+      "revision": "f3b8e1247f133f3d098833a251b8f2d744c03e1f",
+      "patch_sha256": "0581f9c919c47389d7e2adcf7353b6769d5e5c51692d950e3fd50acfc41d9983"
+    }
+  },
+  "limits": [
+    "Existing environment, not a clean GPU installation",
+    "No GPU frontend inference or full-dataset rerun",
+    "Smoke fixture is not experimental accuracy evidence",
+    "No live-device or end-to-end latency validation"
+  ]
+}

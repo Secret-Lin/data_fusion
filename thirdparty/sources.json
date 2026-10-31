@@ -1,0 +1,35 @@
+{
+  "FoundationPose": {
+    "url": "https://github.com/NVlabs/FoundationPose.git",
+    "revision": "a1b694b83e633c2cb6115b9063d940a687759392",
+    "patch": "patches/FoundationPose.patch",
+    "patch_sha256": "60ec0c495bac4f697fdf27c1ed925291685faa1bb80f681d77890255cccdecee"
+  },
+  "CNOS": {
+    "url": "https://github.com/nv-nguyen/cnos.git",
+    "revision": "298d1f3366171464ca271659f0e2f7a6eb8e39b4"
+  },
+  "dinov2": {
+    "url": "https://github.com/facebookresearch/dinov2.git",
+    "revision": "7764ea0f912e53c92e82eb78a2a1631e92725fc8"
+  },
+  "3DObjectTracking": {
+    "url": "https://github.com/DLR-RM/3DObjectTracking.git",
+    "revision": "f02106186a1e756450226b3b793e309506817c58"
+  },
+  "megapose6d": {
+    "url": "https://github.com/megapose6d/megapose6d.git",
+    "revision": "f3b8e1247f133f3d098833a251b8f2d744c03e1f",
+    "patch": "patches/megapose6d.patch",
+    "patch_sha256": "0581f9c919c47389d7e2adcf7353b6769d5e5c51692d950e3fd50acfc41d9983"
+  },
+  "hl2ss": {
+    "url": "https://github.com/jdibenes/hl2ss.git",
+    "revision": "48758a491a576332484639847cfbc1a95ff76845"
+  },
+  "bop_toolkit_challenge": {
+    "url": "https://github.com/ylabbe/bop_toolkit_challenge.git",
+    "revision": "55f3bf1f70d7a85e846e747cde19633117bfe0df",
+    "destination": "megapose6d/deps/bop_toolkit_challenge"
+  }
+}
